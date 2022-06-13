@@ -1,4 +1,3 @@
-import email
 import sqlalchemy.orm as _orm
 import database as _database
 import models as _models
