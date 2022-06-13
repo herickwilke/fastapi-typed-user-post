@@ -12,7 +12,7 @@ _services.create_database()
 @app.post("/users/", response_model=_schemas.User)
 def create_user(user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)):
     '''
-    Creates a new user 
+    Creates a new user
     '''
     db_user = _services.get_user_by_email(db=db, email=user.email)
     if db_user:
@@ -25,7 +25,7 @@ def create_user(user: _schemas.UserCreate, db: _orm.Session = _fastapi.Depends(_
 @app.get("/users/", response_model=List[_schemas.User])
 def read_users(skip: int = 0, limit: int = 10, db: _orm.Session = _fastapi.Depends(_services.get_db)):
     '''
-    Get all the users from the database, but paginating them. Default setted 0 to 10. 
+    Get all the users from the database, but paginating them. Default setted 0 to 10.
     '''
     users = _services.get_users(db=db, skip=skip, limit=limit)
     return users
@@ -58,7 +58,7 @@ def create_post(user_id: int, post: _schemas._PostCreate, db: _orm.Session = _fa
 @app.get("/posts/", response_model=List[_schemas.Post])
 def read_posts(skip: int = 0, limit: int = 10, db: _orm.Session = _fastapi.Depends(_services.get_db)):
     '''
-    Get all the posts from the database, but paginating them. Default setted 0 to 10. 
+    Get all the posts from the database, but paginating them. Default setted 0 to 10.
     '''
     posts = _services.get_posts(db=db, skip=skip, limit=limit)
     return posts
@@ -66,8 +66,36 @@ def read_posts(skip: int = 0, limit: int = 10, db: _orm.Session = _fastapi.Depen
 
 @app.get("/posts/{post_id}", response_model=_schemas.Post)
 def read_post(post_id: int, db: _orm.Session = _fastapi.Depends(_services.get_db)):
+    '''
+    Get a specific post from the database given an id
+    '''
     post = _services.get_post(db=db, post_id=post_id)
     if post is None:
         raise _fastapi.HTTPException(
             status_code=404, detail="Sorry, this post doesn't exist")
     return post
+
+
+@app.delete("/posts/{post_id}")
+def delete_post(post_id: int, db: _orm.Session = _fastapi.Depends(_services.get_db)):
+    '''
+    Delete a specific post from the database given an id
+    '''
+    post = _services.get_post(db=db, post_id=post_id)
+    if post is None:
+        raise _fastapi.HTTPException(
+            status_code=404, detail="Sorry, this post doesn't exist")
+    _services.delete_post(db=db, post_id=post_id)
+    return {"message": "Successfully deleted post with id {post_id}"}
+
+
+@app.put("/posts/{post_id}", response_model=_schemas.Post)
+def update_post(post_id: int, post: _schemas._PostCreate, db: _orm.Session = _fastapi.Depends(_services.get_db)):
+    '''
+    Updates a specific post from the database given an id
+    '''
+    post_exists = _services.get_post(db=db, post_id=post_id)
+    if post_exists is None:
+        raise _fastapi.HTTPException(
+            status_code=404, detail="Sorry, this post doesn't exist")
+    return _services.update_post(db=db, post=post, post_id=post_id)
