@@ -28,3 +28,27 @@ def create_user(db: _orm.Session, user: _schemas.UserCreate):
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+def get_users(db: _orm.Session, skip: int, limit: int):
+    return db.query(_models.User).offset(skip).limit(limit).all()
+
+
+def get_user(db: _orm.Session, user_id: int):
+    return db.query(_models.User).filter(_models.User.id == user_id).first()
+
+
+def create_post(db: _orm.Session, post: _schemas._PostCreate, user_id: int):
+    post = _models.Post(**post.dict(), owner_id=user_id)
+    db.add(post)
+    db.commit()
+    db.refresh(post)
+    return post
+
+
+def get_posts(db: _orm.Session, skip: int, limit: int):
+    return db.query(_models.Post).offset(skip).limit(limit).all()
+
+
+def get_post(db: _orm.Session, post_id: int):
+    return db.query(_models.Post).filter(_models.Post.id == post_id).first()
